@@ -265,7 +265,7 @@ int counter=100;
  void HAL_TIM_PeriodElapsedCallback ( TIM_HandleTypeDef * htim )
 {
 	 if(counter>=0) {
-		 if(counter/50==1&&counter%50==0)
+		 if(0<counter&&counter<100&&counter%25==0)
 		 {
 			 if(index>3)index=0;
 			 led_buffer[index]++;
