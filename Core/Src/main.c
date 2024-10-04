@@ -235,37 +235,53 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-int counter = 50;
-int count7seg=0;
-int state=0;
+
+const int MAX_LED=4;
+int index=0;
+int led_buffer[4]={1,2,3,4};
+void update7SEG ( int index ) {
+	switch(index)
+	{
+	case 0:
+		open7segNumber(index);
+		display7SEG(led_buffer[0]);
+		break;
+	case 1:
+		open7segNumber(index);
+		display7SEG(led_buffer[1]);
+		break;
+	case 2:
+		open7segNumber(index);
+		display7SEG(led_buffer[2]);
+		break;
+	case 3:
+		open7segNumber(index);
+		display7SEG(led_buffer[3]);
+		break;
+	}
+}
+int counter=100;
+
  void HAL_TIM_PeriodElapsedCallback ( TIM_HandleTypeDef * htim )
 {
-
-	 if(state==0)
-	 {
-		 open7segNumber(state);
-		 display7SEG(1);
+	 if(counter>=0) {
+		 if(counter/50==1&&counter%50==0)
+		 {
+			 if(index>3)index=0;
+			 led_buffer[index]++;
+			 if(led_buffer[index]>9)led_buffer[index]=0;
+			 update7SEG(index++);
+		 }
+		 counter--;
 	 }
-	 if(state==1)
-	 {
-		 open7segNumber(state);
-		 display7SEG(2);
+	 else{
+		 counter=100;
+		 if(index>3)index=0;
+		 led_buffer[index]++;
+		 if(led_buffer[index]>9)led_buffer[index]=0;
+		 update7SEG(index++);
+		 HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
 	 }
-
-	 if(state==2)
-	 {
-		 open7segNumber(state);
-		 display7SEG(3);
-	 }
-	 if(state==3)
-	 {
-		 open7segNumber(state);
-		 display7SEG(0);
-	 }
-	 if(counter>=0) {counter--;}
-	 else{counter=50;HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);state++; if(state>3)state=0;}
-
-
  }
 
 

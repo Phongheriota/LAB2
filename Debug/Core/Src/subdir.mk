@@ -5,7 +5,6 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../Core/Src/button.c \
 ../Core/Src/display7SEG.c \
 ../Core/Src/main.c \
 ../Core/Src/open7segNumber.c \
@@ -17,7 +16,6 @@ C_SRCS += \
 ../Core/Src/system_stm32f1xx.c 
 
 OBJS += \
-./Core/Src/button.o \
 ./Core/Src/display7SEG.o \
 ./Core/Src/main.o \
 ./Core/Src/open7segNumber.o \
@@ -29,7 +27,6 @@ OBJS += \
 ./Core/Src/system_stm32f1xx.o 
 
 C_DEPS += \
-./Core/Src/button.d \
 ./Core/Src/display7SEG.d \
 ./Core/Src/main.d \
 ./Core/Src/open7segNumber.d \
