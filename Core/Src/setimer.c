@@ -6,7 +6,7 @@
  */
 
 #include "main.h"
-int timer_count=0;
+int timer_count=100;
 
 void setTimer(int time){
 	timer_count=time/10;

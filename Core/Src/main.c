@@ -99,6 +99,7 @@ HAL_TIM_Base_Start_IT(&htim2);
   {
 
 
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -205,8 +206,8 @@ static void MX_GPIO_Init(void)
                           |EN2_Pin|EN3_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, SEG1_Pin|SEG2_Pin|SEG3_Pin|SEG4_Pin
-                          |SEG5_Pin|SEG6_Pin|SEG7_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, SEG1_Pin|SEG2_Pin|SEG3_Pin|GPIO_PIN_11
+                          |SEG4_Pin|SEG5_Pin|SEG6_Pin|SEG7_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : BUTTON_Pin */
   GPIO_InitStruct.Pin = BUTTON_Pin;
@@ -223,10 +224,10 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : SEG1_Pin SEG2_Pin SEG3_Pin SEG4_Pin
-                           SEG5_Pin SEG6_Pin SEG7_Pin */
-  GPIO_InitStruct.Pin = SEG1_Pin|SEG2_Pin|SEG3_Pin|SEG4_Pin
-                          |SEG5_Pin|SEG6_Pin|SEG7_Pin;
+  /*Configure GPIO pins : SEG1_Pin SEG2_Pin SEG3_Pin PB11
+                           SEG4_Pin SEG5_Pin SEG6_Pin SEG7_Pin */
+  GPIO_InitStruct.Pin = SEG1_Pin|SEG2_Pin|SEG3_Pin|GPIO_PIN_11
+                          |SEG4_Pin|SEG5_Pin|SEG6_Pin|SEG7_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -260,16 +261,41 @@ void update7SEG ( int index ) {
 		break;
 	}
 }
-int counter=100;
+void updateled(int h,int m)
+{
+	led_buffer[0]=h/10;
+	led_buffer[1]=h%10;
+	led_buffer[2]=m/10;
+	led_buffer[3]=m%10;
+}
 
+int counter=100;
+int hour=10;
+int minute=3;
+int second=55;
  void HAL_TIM_PeriodElapsedCallback ( TIM_HandleTypeDef * htim )
 {
+
+	  if(second>=60)
+	  {
+		  minute++;
+		  second=0;
+	  }
+	  if(minute>=60)
+	  {
+		  hour++;
+		  minute=0;
+	  }
+	  if(hour>=24)
+	  {
+		  hour=0;
+	  }
+
+	  updateled(hour, minute);
 	 if(counter>=0) {
 		 if(0<counter&&counter<100&&counter%25==0)
 		 {
 			 if(index>3)index=0;
-			 led_buffer[index]++;
-			 if(led_buffer[index]>9)led_buffer[index]=0;
 			 update7SEG(index++);
 		 }
 		 counter--;
@@ -277,10 +303,8 @@ int counter=100;
 	 else{
 		 counter=100;
 		 if(index>3)index=0;
-		 led_buffer[index]++;
-		 if(led_buffer[index]>9)led_buffer[index]=0;
 		 update7SEG(index++);
-		 HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
+		 second++;
 	 }
  }
 
