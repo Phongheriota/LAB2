@@ -1,2 +1,2 @@
 setimer.c:11:6:setTimer	16	static
-setimer.c:15:6:timer_run	4	static
+setimer.c:14:6:timer_run	4	static
