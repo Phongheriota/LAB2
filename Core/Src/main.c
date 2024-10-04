@@ -56,8 +56,22 @@ static void MX_GPIO_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
-
+int timer_count=0;
+int timer_flag=0;
+int TIME_CYCLE=10;
+void setTimer(int duration)
+{
+	timer_count=duration/TIME_CYCLE;
+	timer_flag=0;
+}
+void timer_run()
+{
+	if(timer_count>0)
+		{
+		timer_count--;
+		if(timer_count==0)timer_flag=1;
+		}
+}
 /* USER CODE END 0 */
 
 /**
@@ -94,11 +108,14 @@ HAL_TIM_Base_Start_IT(&htim2);
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-
+setTimer(1000);
   while (1)
   {
-
-
+	  if(timer_flag==1)
+	  {
+		  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+		  setTimer(2000);
+	  }
 
     /* USER CODE END WHILE */
 
@@ -275,8 +292,8 @@ int minute=3;
 int second=55;
  void HAL_TIM_PeriodElapsedCallback ( TIM_HandleTypeDef * htim )
 {
-
-	  if(second>=60)
+	 timer_run();
+	/*  if(second>=60)
 	  {
 		  minute++;
 		  second=0;
@@ -305,7 +322,7 @@ int second=55;
 		 if(index>3)index=0;
 		 update7SEG(index++);
 		 second++;
-	 }
+	 }*/
  }
 
 
