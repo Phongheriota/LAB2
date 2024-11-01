@@ -108,75 +108,14 @@ HAL_TIM_Base_Start_IT(&htim2);
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-const int MAX_LED=4;
-int index=0;
-int led_buffer[4]={1,2,3,4};
-void update7SEG ( int index ) {
-	switch(index)
-	{
-	case 0:
-		open7segNumber(index);
-		display7SEG(led_buffer[0]);
-		break;
-	case 1:
-		open7segNumber(index);
-		display7SEG(led_buffer[1]);
-		break;
-	case 2:
-		open7segNumber(index);
-		display7SEG(led_buffer[2]);
-		break;
-	case 3:
-		open7segNumber(index);
-		display7SEG(led_buffer[3]);
-		break;
-	}
-}
-void updateled(int h,int m)
-{
-	led_buffer[0]=h/10;
-	led_buffer[1]=h%10;
-	led_buffer[2]=m/10;
-	led_buffer[3]=m%10;
-}
 
-int counter=100;
-int hour=10;
-int minute=3;
-int second=55;
-setTimer(10);
+setTimer(1000);
   while (1)
   {
-
-	  if(second>=60)
-	  	  {
-	  		  minute++;
-	  		  second=0;
-	  	  }
-	  	  if(minute>=60)
-	  	  {
-	  		  hour++;
-	  		  minute=0;
-	  	  }
-	  	  if(hour>=24)
-	  	  {
-	  		  hour=0;
-	  	  }
-
-	  	  updateled(hour, minute);
 	  	 if(timer_flag==1)
 	  	 {
-	  		 if(index>3)
-	  		 {
-	  			 index=0;
-	  			 update7SEG(index++);
-	  			 second++;
-	  		 }
-	  		 else
-	  		 {
-	  			 update7SEG(index++);
-	  		 }
-	  		 setTimer(250);
+	  		 HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+	  		 setTimer(1000);
 	  	 }
 
     /* USER CODE END WHILE */
