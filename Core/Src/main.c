@@ -40,6 +40,7 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN PV */
@@ -50,6 +51,7 @@ TIM_HandleTypeDef htim2;
 void SystemClock_Config(void);
 static void MX_TIM2_Init(void);
 static void MX_GPIO_Init(void);
+static void MX_TIM1_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -59,17 +61,33 @@ static void MX_GPIO_Init(void);
 int timer_count=0;
 int timer_flag=0;
 int TIME_CYCLE=10;
+int timer_count1=0;
+int timer_flag1=0;
 void setTimer(int duration)
 {
 	timer_count=duration/TIME_CYCLE;
 	timer_flag=0;
 }
+
 void timer_run()
 {
 	if(timer_count>0)
 		{
 		timer_count--;
 		if(timer_count==0)timer_flag=1;
+		}
+}
+void setTimer1(int duration)
+{
+	timer_count1=duration/TIME_CYCLE;
+	timer_flag1=0;
+}
+void timer_run1()
+{
+	if(timer_count1>0)
+		{
+		timer_count1--;
+		if(timer_count1==0)timer_flag1=1;
 		}
 }
 /* USER CODE END 0 */
@@ -102,6 +120,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_TIM2_Init();
   MX_GPIO_Init();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
 HAL_TIM_Base_Start_IT(&htim2);
   /* USER CODE END 2 */
@@ -141,44 +160,51 @@ void updateled(int h,int m)
 }
 
 int counter=100;
-int hour=10;
-int minute=3;
-int second=55;
+int hour=13;
+int minute=8;
+int second=50;
 setTimer(10);
+setTimer1(10);
   while (1)
   {
 
-	  if(second>=60)
-	  	  {
-	  		  minute++;
-	  		  second=0;
-	  	  }
-	  	  if(minute>=60)
-	  	  {
-	  		  hour++;
-	  		  minute=0;
-	  	  }
-	  	  if(hour>=24)
-	  	  {
-	  		  hour=0;
-	  	  }
 
-	  	  updateled(hour, minute);
 	  	 if(timer_flag==1)
 	  	 {
+	  		 setTimer(250);
 	  		 if(index>3)
 	  		 {
 	  			 index=0;
 	  			 update7SEG(index++);
-	  			 second++;
 	  		 }
 	  		 else
 	  		 {
 	  			 update7SEG(index++);
 	  		 }
-	  		 setTimer(250);
-	  	 }
 
+	  	 }
+	  	 if(timer_flag1==1)
+	  		 {
+	  		 second++;
+	  		  if(second>=60)
+	  		  	  {
+	  		  		  minute++;
+	  		  		  second=0;
+	  		  	  }
+	  		  	  if(minute>=60)
+	  		  	  {
+	  		  		  hour++;
+	  		  		  minute=0;
+	  		  	  }
+	  		  	  if(hour>=24)
+	  		  	  {
+	  		  		  hour=0;
+	  		  	  }
+
+	  		  	  updateled(hour, minute);
+  			 HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
+  			 setTimer1(1000);
+	  		 }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -219,6 +245,52 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief TIM1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM1_Init(void)
+{
+
+  /* USER CODE BEGIN TIM1_Init 0 */
+
+  /* USER CODE END TIM1_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM1_Init 1 */
+
+  /* USER CODE END TIM1_Init 1 */
+  htim1.Instance = TIM1;
+  htim1.Init.Prescaler = 7999;
+  htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim1.Init.Period = 9;
+  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim1.Init.RepetitionCounter = 0;
+  htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim1, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM1_Init 2 */
+
+  /* USER CODE END TIM1_Init 2 */
+
 }
 
 /**
@@ -320,36 +392,7 @@ static void MX_GPIO_Init(void)
  void HAL_TIM_PeriodElapsedCallback ( TIM_HandleTypeDef * htim )
 {
 	 timer_run();
-	/*  if(second>=60)
-	  {
-		  minute++;
-		  second=0;
-	  }
-	  if(minute>=60)
-	  {
-		  hour++;
-		  minute=0;
-	  }
-	  if(hour>=24)
-	  {
-		  hour=0;
-	  }
-
-	  updateled(hour, minute);
-	 if(counter>=0) {
-		 if(0<counter&&counter<100&&counter%25==0)
-		 {
-			 if(index>3)index=0;
-			 update7SEG(index++);
-		 }
-		 counter--;
-	 }
-	 else{
-		 counter=100;
-		 if(index>3)index=0;
-		 update7SEG(index++);
-		 second++;
-	 }*/
+	 timer_run1();
  }
 
 
