@@ -103,82 +103,100 @@ int main(void)
   MX_TIM2_Init();
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
+  const int MAX_LED_MATRIX=8;
+  int index_led_matrix = 0;
+  uint8_t matrix_buffer [8] = {
+		  	0b00111100,
+		    0b01100110,
+		    0b11000011,
+		    0b11000011,
+		    0b11111111,
+		    0b11000011,
+		    0b11000011,
+		    0b00000000};
+  uint16_t pins_to_set[] = {GPIO_PIN_2, GPIO_PIN_3, GPIO_PIN_10, GPIO_PIN_11, GPIO_PIN_12, GPIO_PIN_13, GPIO_PIN_14, GPIO_PIN_15};
+  void displayLEDMatrix(void) {
+  	if(timer_flag[4]){
+      	setTimer(4, 1);
+      	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15, 0xFC0C);
+      	// Tắt tất cả các chân
+      	col = (col + 1) % MAX_LED_MATRIX;
+      }
+  	// Bật cột (col) tương ứng bằng cách sử dụng ULN2803 với tín hiệu đầu vào bằng 0
+  	HAL_GPIO_WritePin(GPIOA, pins_to_set[col], GPIO_PIN_RESET);
+  	// Hiển thị dữ liệu của cột (matrix_buffer[col]) lên hàng (row) tương ứng
+  	// Sử dụng GPIO_PIN_SET cho common cathode và GPIO_PIN_RESET cho common anode
+  	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, (matrix_buffer[col] & 0x01) ? GPIO_PIN_SET : GPIO_PIN_RESET);
+  	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, (matrix_buffer[col] & 0x02) ? GPIO_PIN_SET : GPIO_PIN_RESET);
+  	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_10, (matrix_buffer[col] & 0x04) ? GPIO_PIN_SET : GPIO_PIN_RESET);
+  	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_11, (matrix_buffer[col] & 0x08) ? GPIO_PIN_SET : GPIO_PIN_RESET);
+  	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, (matrix_buffer[col] & 0x10) ? GPIO_PIN_SET : GPIO_PIN_RESET);
+  	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, (matrix_buffer[col] & 0x20) ? GPIO_PIN_SET : GPIO_PIN_RESET);
+  	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, (matrix_buffer[col] & 0x40) ? GPIO_PIN_SET : GPIO_PIN_RESET);
+  	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, (matrix_buffer[col] & 0x80) ? GPIO_PIN_SET : GPIO_PIN_RESET);
+  }
+  void updateLEDMatrix(int index) {
+      switch (index) {
+          case 0:
+              // Example pattern: First row onix_buffer[0] = 0xFF; // All LEDs in the first row ON
+              break;
+          case 1:
+              // Example pattern: Second row on
+              matrix_buffer[1] = 0xFF; // All LEDs in the second row ON
+              break;
+          case 2:
+              // Example pattern: Third row on
+              matrix_buffer[2] = 0xFF; // All LEDs in the third row ON
+              break;
+          case 3:
+              // Example pattern: Fourth row on
+              matrix_buffer[3] = 0xFF; // All LEDs in the fourth row ON
+              break;
+          case 4:
+              // Example pattern: Fifth row on
+              matrix_buffer[4] = 0xFF; // All LEDs in the fifth row ON
+              break;
+          case 5:
+              // Example pattern: Sixth row on
+              matrix_buffer[5] = 0xFF; // All LEDs in the sixth row ON
+              break;
+          case 6:
+              // Example pattern: Seventh row on
+              matrix_buffer[6] = 0xFF; // All LEDs in the seventh row ON
+              break;
+          case 7:
+              // Example pattern: Eighth row on
+              matrix_buffer[7] = 0xFF; // All LEDs in the eighth row ON
+              break;
+          default:
+              // Default case, clear the matrix
+              for (int i = 0; i < MAX_LED_MATRIX; i++) {
+                  matrix_buffer[i] = 0x00; // Clear all rows
+              }
+              break;
+      }
+
+  }
 HAL_TIM_Base_Start_IT(&htim2);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-const int MAX_LED=4;
-int index=0;
-int led_buffer[4]={1,2,3,4};
-void update7SEG ( int index ) {
-	switch(index)
-	{
-	case 0:
-		open7segNumber(index);
-		display7SEG(led_buffer[0]);
-		break;
-	case 1:
-		open7segNumber(index);
-		display7SEG(led_buffer[1]);
-		break;
-	case 2:
-		open7segNumber(index);
-		display7SEG(led_buffer[2]);
-		break;
-	case 3:
-		open7segNumber(index);
-		display7SEG(led_buffer[3]);
-		break;
-	}
-}
-void updateled(int h,int m)
-{
-	led_buffer[0]=h/10;
-	led_buffer[1]=h%10;
-	led_buffer[2]=m/10;
-	led_buffer[3]=m%10;
+void displayMatrix(uint8_t *pattern) {
+    for (int row = 0; row < 8; row++) {
+    	HAL_GPIO_WritePin(GPIOB, 0xFF, GPIO_PIN_RESET); // Reset previous row
+    	HAL_GPIO_WritePin(GPIOB, (1 << row), GPIO_PIN_SET); // Set current row
+    	        HAL_Delay(1000);
+
+    }
 }
 
-int counter=100;
-int hour=10;
-int minute=3;
-int second=55;
-setTimer(10);
+
+setTimer(100);
   while (1)
   {
-
-	  if(second>=60)
-	  	  {
-	  		  minute++;
-	  		  second=0;
-	  	  }
-	  	  if(minute>=60)
-	  	  {
-	  		  hour++;
-	  		  minute=0;
-	  	  }
-	  	  if(hour>=24)
-	  	  {
-	  		  hour=0;
-	  	  }
-
-	  	  updateled(hour, minute);
-	  	 if(timer_flag==1)
-	  	 {
-	  		 if(index>3)
-	  		 {
-	  			 index=0;
-	  			 update7SEG(index++);
-	  			 second++;
-	  		 }
-	  		 else
-	  		 {
-	  			 update7SEG(index++);
-	  		 }
-	  		 setTimer(250);
-	  	 }
-
+	  HAL_GPIO_WritePin(ROW3_GPIO_Port,ROW3_Pin ,SET); // Set current row
+	  HAL_GPIO_WritePin(ROW3_GPIO_Port,ROW2_Pin ,SET);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
